@@ -1,17 +1,16 @@
 using Random, Parameters, RandomNumbers.Xorshifts,  DiffEqBiological, DiffEqJump
 
-function dm_solve(jump_prob; dep_graph=nothing, times=nothing)
-    parameters = dm_do_setup(jump_prob, dep_graph, times)
+function dm_solve(jump_prob; times=nothing)
+    parameters = dm_do_setup(jump_prob, times)
     return dm_run_simulation(parameters...)
 end
 
-function dm_do_setup(jump_prob, dep_graph, times)
+function dm_do_setup(jump_prob, times)
     @unpack massaction_jump = jump_prob
     @unpack u0 = jump_prob.prob
     t0 = jump_prob.prob.tspan[1]
     N = length(u0)
-    if dep_graph === nothing
-        dep_graph = DiffEqJump.make_dependency_graph(N, massaction_jump) end
+    dep_graph = get_dep_graph(jump_prob, massaction_jump, N)
     if times === nothing
         times = [t0]
         states = [u0]

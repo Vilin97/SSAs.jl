@@ -1,5 +1,11 @@
 using ReactionNetworkImporters, DiffEqProblemLibrary.JumpProblemLibrary, RandomNumbers.Xorshifts, Plots, DiffEqJump
 
+function get_dep_graph(jump_prob, massaction_jump, N)
+    try jump_prob.discrete_jump_aggregation.dep_gr
+    catch
+        DiffEqJump.make_dependency_graph(N, massaction_jump) end
+end
+
 function record_state!(states, save_all_jumps,state,times,t,idx)
     if save_all_jumps
         push!(states, copy(state))
@@ -53,7 +59,7 @@ function multi_jump_prob(method)
 end
 
 function big_jump_prob(method)
-    tf = 0.1
+    tf = 10.
     fname = "network_data\\blank_file_equilibration.net"
     prnbng = loadrxnetwork(BNGNetwork(), "BNGRepressilator", fname)
     rn = prnbng.rn

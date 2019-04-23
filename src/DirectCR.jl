@@ -1,11 +1,11 @@
 using DiffEqBiological, DiffEqJump, Random, Parameters, RandomNumbers.Xorshifts
 
-function cr_solve(jump_prob; rt0=nothing, dep_graph=nothing, times=nothing, use_dict = false)
-    parameters = cr_do_setup(jump_prob, rt0, dep_graph, times, use_dict)
+function cr_solve(jump_prob; rt0=nothing, times=nothing, use_dict = false)
+    parameters = cr_do_setup(jump_prob, rt0, times, use_dict)
     return cr_run_simulation(parameters...)
 end
 
-function cr_do_setup(jump_prob, rt0=nothing, dep_graph=nothing, times=nothing, use_dict = false)
+function cr_do_setup(jump_prob, rt0=nothing, times=nothing, use_dict = false)
     @unpack massaction_jump = jump_prob
     @unpack u0 = jump_prob.prob
     N = length(u0)
@@ -19,8 +19,7 @@ function cr_do_setup(jump_prob, rt0=nothing, dep_graph=nothing, times=nothing, u
         end
     else rt = copy(rt0)
     end
-    if dep_graph === nothing
-        dep_graph = DiffEqJump.make_dependency_graph(N, massaction_jump) end
+    dep_graph = get_dep_graph(jump_prob, massaction_jump, N)
     if times === nothing
         times = [t0]
         states = [u0]

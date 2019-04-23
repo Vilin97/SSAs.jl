@@ -24,9 +24,10 @@ function my_solve(jump_prob, method::String, times=nothing)
         times, states = dm_solve(jump_prob, times=times)
     elseif method == "NRM"
         times, states = nrm_solve(jump_prob, times=times)
-    else println("Wrong method")
     end
-    return times, states
+    try return times, states
+    catch
+        println("Wrong method!") end
 end
 
 end # module

@@ -3,20 +3,19 @@ using DiffEqBiological, DiffEqJump, Random, Parameters, RandomNumbers.Xorshifts
 const spec_bound = 1.1
 const r_spec_bound = 1/1.1
 
-function rssa_solve(jump_prob; dep_graph=nothing, times=nothing, try_new = false)
-    parameters = do_setup(jump_prob, dep_graph, times, try_new)
+function rssa_solve(jump_prob; times=nothing, try_new = false)
+    parameters = do_setup(jump_prob, times, try_new)
     return run_simulation(parameters...)
 end
 
 
-function do_setup(jump_prob, dep_graph, times, try_new)
+function do_setup(jump_prob, times, try_new)
     @unpack massaction_jump = jump_prob
     @unpack u0 = jump_prob.prob
     t0 = jump_prob.prob.tspan[1]
     N = length(u0)
     M = get_num_majumps(massaction_jump)
-    if dep_graph === nothing
-        dep_graph = DiffEqJump.make_dependency_graph(N, massaction_jump) end
+    dep_graph = get_dep_graph(jump_prob, massaction_jump, N)
     if times === nothing
         times = [t0]
         states = [u0]
@@ -98,17 +97,17 @@ function r_sample_new(rx_total_rate, Hprop, Lprop, M, state, massaction_jump, kn
     accepted = false
     mu = 0
     prod = 1.
-    while !accepted
+    while true
         mu = DM_search(rx_total_rate, Hprop, 1:M, s)
         r = rand(s)
         prod *= r
         temp = Hprop[mu]
         if r*temp <= Lprop[mu]
-            accepted = true
+            return mu, -log(prod)/rx_total_rate
         elseif !known[mu]
             prop = DiffEqJump.evalrxrate(state, mu, massaction_jump)
             props[mu] = prop
-            accepted = (r*temp <= prop)
+            if r*temp <= prop return mu, -log(prod)/rx_total_rate end
         end
     end
     return mu, -log(prod)/rx_total_rate

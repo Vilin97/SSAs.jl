@@ -1,3 +1,4 @@
 benchmark_data/
 network_data/
-benchmarkingscript.jl
+benchmarking_script.jl
+*.json
