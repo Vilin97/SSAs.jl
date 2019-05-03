@@ -59,7 +59,7 @@ function multi_jump_prob(method)
 end
 
 function big_jump_prob(method)
-    tf = 10.
+    tf = 1.
     fname = "network_data\\blank_file_equilibration.net"
     prnbng = loadrxnetwork(BNGNetwork(), "BNGRepressilator", fname)
     rn = prnbng.rn
@@ -86,7 +86,7 @@ function get_median_times(results, model)
     methods = sort!(collect(keys(results[model])))
     times = zeros(Float64, length(methods))
     for k in 1:length(methods)
-        times[k] = BenchmarkTools.median(results[model][methods[k]]).time/10^6 #get miliseconds
+        times[k] = BenchmarkTools.median(results[model][methods[k]]).time/10^9 #get seconds
     end
     for k in 1:length(methods)
         name = methods[k]
